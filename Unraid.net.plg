@@ -2,9 +2,9 @@
 
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "Unraid.net">
-<!ENTITY launch    "Settings/Management Access">
+<!ENTITY launch    "Settings/ManagementAccess">
 <!ENTITY author    "limetech">
-<!ENTITY version   "2019.03.07">
+<!ENTITY version   "2019.03.07a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/limetech/&name;/master/&name;.plg">
 ]>
 
