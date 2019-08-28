@@ -4,16 +4,41 @@
 <!ENTITY name      "Unraid.net">
 <!ENTITY launch    "Settings/ManagementAccess">
 <!ENTITY author    "limetech">
-<!ENTITY version   "2019.03.07a">
+<!ENTITY version   "2019.08.20">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/limetech/&name;/master/&name;.plg">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" min="6.8.0-rc0p">
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" launch="&launch;" support="https://forums.unraid.net" min="6.8.0-rc0p">
+
+<CHANGES>
+##&name;
+
+###&version;
+- initial release
+</CHANGES>
 
 <!-- The 'install' script. -->
 <FILE Run="/bin/bash" Method="install">
 <INLINE>
 [ -f /usr/local/emhttp/plugins/dynamix/include/UpdateDNS.php ] &amp;&amp; mv -f /usr/local/emhttp/plugins/dynamix/include/UpdateDNS.php /usr/local/emhttp/plugins/dynamix/include/UpdateDNS.php-
+</INLINE>
+</FILE>
+
+<!-- README FILE -->
+<FILE Name="/usr/local/emhttp/plugins/&name;/README.md">
+<INLINE>
+** Unraid.net **
+
+Unraid.net provides access to a set web-based services:
+
+* Server status such as online/offline, storage used/available, etc.
+* Links for local and remote access to your server webGUI.
+* Backup and Restore of your USB Flash boot device.
+* much more to come
+
+A server is registered using your Unraid Community Forum credentials.  Registered servers appear under the My Servers forum sub-menu.
+
+This is work in progress. Use this for testing purposes only!
 </INLINE>
 </FILE>
 
