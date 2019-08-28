@@ -4,7 +4,7 @@
 <!ENTITY name      "Unraid.net">
 <!ENTITY launch    "Settings/ManagementAccess">
 <!ENTITY author    "limetech">
-<!ENTITY version   "2019.08.20">
+<!ENTITY version   "2019.08.20a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/limetech/&name;/master/&name;.plg">
 ]>
 
@@ -27,7 +27,7 @@
 <!-- README FILE -->
 <FILE Name="/usr/local/emhttp/plugins/&name;/README.md">
 <INLINE>
-** Unraid.net **
+**Unraid.net**
 
 Unraid.net provides access to a set web-based services:
 
