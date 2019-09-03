@@ -134,6 +134,12 @@ if ($isRegistered) {
 }
 ?>
 <script>
+$(function(){
+	if ( typeof caPluginUpdateCheck === "function" ) {
+		caPluginUpdateCheck("Unraid.net.plg",{name:"Unraid.net",element:".unRAIDnetUpdate"});
+	}
+});
+
 function registerServer(button) {
     var oldlabel = $.trim($(button).text());
 
@@ -273,6 +279,7 @@ function enableFlashBackup(button) {
     }
 }
 </script>
+<div class='unRAIDnetUpdate'></div>
 <form markdown="1" name="UnraidNetSettings" method="POST" action="/update.htm" target="progressFrame">
 <?if(!$isRegistered):?>
 Unraid.net Status:
