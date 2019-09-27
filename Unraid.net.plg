@@ -6,8 +6,8 @@
 <!ENTITY author    "limetech">
 <!ENTITY version   "2019.09.27">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/limetech/&name;/master/&name;.plg">
-<!ENTITY graphql-api "https://github.com/unraid/graphql-api/releases/download/v1.0.15/unraid-graphql-api-1.0.15.tgz">
-<!ENTITY plugins     "https://github.com/unraid/plugins/releases/download/v1.0.7/unraid-plugins-1.0.7.tgz">
+<!ENTITY graphql-api "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-graphql-api-1.0.9.tgz">
+<!ENTITY plugins     "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-plugins-1.0.7.tgz">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" launch="&launch;" support="https://forums.unraid.net" min="6.8.0-rc0w">
