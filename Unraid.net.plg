@@ -53,6 +53,8 @@ start() {
     tar -C /usr/local/sbin -xf /boot/config/plugins/Unraid.net/unraid-${i}.tgz
     rm -rf /usr/local/sbin/${i}
     mv /usr/local/sbin/package /usr/local/sbin/${i}
+  done
+  for i in ${node_apps[@]}; do
     if [ -f /usr/local/sbin/${i}/ecosystem.config.js ]; then
       (cd /usr/local/sbin/${i}/ && PM2_HOME=/root/.pm2 /usr/lib/node_modules/pm2/bin/pm2 start ./ecosystem.config.js --silent --env production)
     fi
