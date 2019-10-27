@@ -4,9 +4,9 @@
 <!ENTITY name      "Unraid.net">
 <!ENTITY launch    "Settings/ManagementAccess">
 <!ENTITY author    "limetech">
-<!ENTITY version   "2019.10.26">
+<!ENTITY version   "2019.10.27">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/limetech/&name;/master/&name;.plg">
-<!ENTITY graphql-api "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-graphql-api-v2.0.7.tgz">
+<!ENTITY graphql-api "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-graphql-api-v2.0.8.tgz">
 <!ENTITY plugins     "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-plugins-v1.0.10.tgz">
 ]>
 
@@ -50,13 +50,13 @@ fi
 node_apps=(graphql-api plugins)
 start() {
   for i in ${node_apps[@]}; do
-    tar -C /usr/local/sbin -xf /boot/config/plugins/Unraid.net/unraid-${i}.tgz
-    rm -rf /usr/local/sbin/${i}
-    mv /usr/local/sbin/package /usr/local/sbin/${i}
+    tar -C /usr/local/node -xf /boot/config/plugins/Unraid.net/unraid-${i}.tgz
+    rm -rf /usr/local/node/${i}
+    mv /usr/local/node/package /usr/local/node/${i}
   done
   for i in ${node_apps[@]}; do
-    if [ -f /usr/local/sbin/${i}/ecosystem.config.js ]; then
-      (cd /usr/local/sbin/${i}/ && PM2_HOME=/root/.pm2 /usr/lib/node_modules/pm2/bin/pm2 start ./ecosystem.config.js --silent --env production)
+    if [ -f /usr/local/node/${i}/ecosystem.config.js ]; then
+      (cd /usr/local/node/${i}/ && PM2_HOME=/root/.pm2 /usr/lib/node_modules/pm2/bin/pm2 start ./ecosystem.config.js --silent --env production)
     fi
   done
 }
@@ -64,7 +64,7 @@ stop() {
   (PM2_HOME=/root/.pm2 /usr/lib/node_modules/pm2/bin/pm2 kill)
   rm -rf /var/run/graphql-api.sock
   for i in ${node_apps[@]}; do
-    rm -rf /usr/local/sbin/${i}
+    rm -rf /usr/local/node/${i}
   done
 }
 case "$1" in
