@@ -49,6 +49,7 @@ fi
 # start/stop unraid-api - development version
 node_apps=(graphql-api plugins)
 start() {
+  mkdir /usr/local/node
   for i in ${node_apps[@]}; do
     tar -C /usr/local/node -xf /boot/config/plugins/Unraid.net/unraid-${i}.tgz
     rm -rf /usr/local/node/${i}
