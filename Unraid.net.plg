@@ -4,9 +4,9 @@
 <!ENTITY name      "Unraid.net">
 <!ENTITY launch    "Settings/ManagementAccess">
 <!ENTITY author    "limetech">
-<!ENTITY version   "2019.11.06">
+<!ENTITY version   "2019.11.10">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/limetech/&name;/next/&name;.plg">
-<!ENTITY graphql-api "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-graphql-api-v2.0.22.tgz">
+<!ENTITY graphql-api "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-graphql-api-v2.1.1.tgz">
 <!ENTITY plugins     "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-plugins-v1.0.10.tgz">
 ]>
 
