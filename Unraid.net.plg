@@ -4,7 +4,7 @@
 <!ENTITY name      "Unraid.net">
 <!ENTITY launch    "Settings/ManagementAccess">
 <!ENTITY author    "limetech">
-<!ENTITY version   "2019.11.25">
+<!ENTITY version   "2019.11.26">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/limetech/&name;/next/&name;.plg">
 <!ENTITY graphql-api "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-graphql-api-v2.1.5.tgz">
 <!ENTITY plugins     "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-plugins-v1.0.10.tgz">
@@ -57,12 +57,15 @@ start() {
   done
   for i in ${node_apps[@]}; do
     if [ -f /usr/local/node/${i}/ecosystem.config.js ]; then
-      (cd /usr/local/node/${i}/ && PM2_HOME=/root/.pm2 /usr/lib/node_modules/pm2/bin/pm2 start ./ecosystem.config.js --silent --env production)
+      NODE_ENV=production nohup node /usr/local/node/${i}/index.js >/var/log/graphql-api.log 2>&1
     fi
   done
 }
 stop() {
-  (PM2_HOME=/root/.pm2 /usr/lib/node_modules/pm2/bin/pm2 kill)
+  pid=$(ps -C graphql-api -o pid --no-headers)
+  if [ -n "$pid" ]; then
+    kill $pid
+  fi
   rm -rf /var/run/graphql-api.sock
   for i in ${node_apps[@]}; do
     rm -rf /usr/local/node/${i}
