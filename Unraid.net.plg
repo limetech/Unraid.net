@@ -4,7 +4,7 @@
 <!ENTITY name      "Unraid.net">
 <!ENTITY launch    "Settings/ManagementAccess">
 <!ENTITY author    "limetech">
-<!ENTITY version   "2019.11.26">
+<!ENTITY version   "2019.11.30">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/limetech/&name;/next/&name;.plg">
 <!ENTITY graphql-api "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-graphql-api-v2.1.5.tgz">
 <!ENTITY plugins     "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-plugins-v1.0.10.tgz">
@@ -49,7 +49,7 @@ fi
 # start/stop unraid-api - development version
 node_apps=(graphql-api plugins)
 start() {
-  mkdir /usr/local/node
+  mkdir -p /usr/local/node
   for i in ${node_apps[@]}; do
     tar -C /usr/local/node -xf /boot/config/plugins/Unraid.net/unraid-${i}.tgz
     rm -rf /usr/local/node/${i}
@@ -57,19 +57,16 @@ start() {
   done
   for i in ${node_apps[@]}; do
     if [ -f /usr/local/node/${i}/ecosystem.config.js ]; then
-      NODE_ENV=production nohup node /usr/local/node/${i}/index.js >/var/log/graphql-api.log 2>&1
+      NODE_ENV=production nohup node /usr/local/node/${i}/index.js >/var/log/${i}.log 2>&1 &
     fi
   done
 }
 stop() {
-  pid=$(ps -C graphql-api -o pid --no-headers)
-  if [ -n "$pid" ]; then
-    kill $pid
-  fi
-  rm -rf /var/run/graphql-api.sock
   for i in ${node_apps[@]}; do
+    pkill ${i}
     rm -rf /usr/local/node/${i}
   done
+  rm -rf /var/run/graphql-api.sock
 }
 case "$1" in
 'start')
@@ -584,8 +581,8 @@ if ($command != 'activate') {
   exec('git -C /boot config --get remote.origin.url', $config_output, $return_var);
   if (($return_var != 0) || (strpos($config_output[0],'backup.unraid.net') === false)) {
     response_complete(406, '{"error":"Not activated"}');
-  }                                              
-}                                              
+  }
+}
 
 // if deactivate command, just remove our origin
 if ($command == 'deactivate') {
@@ -708,7 +705,7 @@ if ($command != 'reinit') {
 exec('git -C /boot status --porcelain', $status_output, $return_var);
 if ($return_var != 0) {
   response_complete(406, '{"error":"'.${status_output[0]}.'"}');
-}                                              
+}
 
 if ($command == 'status') {
   $data = implode("\n", $status_output);
@@ -725,9 +722,9 @@ if (($command == 'update') || ($command == 'reinit')) {
     } else {
       exec('git -C /boot commit -m \'Config change\' &>/dev/null');
       exec('git -C /boot push &>/dev/null');
-    }                                              
-  }                                              
-}                                              
+    }
+  }
+}
 
 response_complete($httpcode, '{}');
 ?>
@@ -738,7 +735,7 @@ response_complete($httpcode, '{}');
 <!-- gitty up -->
 <FILE Run="/bin/bash" Method="install">
 <INLINE>
-/etc/rc.d/rc.unraid-api start
+echo "/etc/rc.d/rc.unraid-api start" | at -M now
 </INLINE>
 </FILE>
 
