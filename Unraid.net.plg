@@ -4,7 +4,7 @@
 <!ENTITY name      "Unraid.net">
 <!ENTITY launch    "Settings/ManagementAccess">
 <!ENTITY author    "limetech">
-<!ENTITY version   "2020.02.03a">
+<!ENTITY version   "2020.02.03b">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/limetech/&name;/next/&name;.plg">
 <!ENTITY graphql-api "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-graphql-api-v2.1.26.tgz">
 <!ENTITY plugins     "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-plugins-v1.1.4.tgz">
@@ -46,9 +46,36 @@ fi
 <INLINE>
 <![CDATA[
 #!/bin/sh
-# install/uninstall unraid-api - development version
+# unraid-core-handler
 downloads=(graphql-api plugins)
 node_apps=(graphql-api)
+status() {
+  master_running=$(ps -C node --no-headers -o pid)
+  graphql_api_running=$(ps -C graphql-api --no-headers -o pid)
+
+  if [[ $master_running ]]; then
+    echo "The master process is running."
+
+    if [[ $graphql_api_running ]]; then
+      echo "graphql-api is running."
+    fi
+  else
+    echo "No processes are running."
+  fi  
+}
+start() {
+  for i in ${node_apps[@]}; do
+    NODE_ENV=production nohup node /usr/local/node/${i}/index.js >/var/log/${i}.log 2>&1 &
+  done
+}
+stop() {
+  for i in ${node_apps[@]}; do
+    pkill ${i}
+  done
+}
+reload() {
+  kill -SIGHUP $(ps -C node --no-headers -o pid)
+}
 install() {
   mkdir -p /usr/local/node
   for i in ${downloads[@]}; do
@@ -56,32 +83,36 @@ install() {
     rm -rf /usr/local/node/${i}
     mv /usr/local/node/package /usr/local/node/${i}
   done
-  for i in ${node_apps[@]}; do
-    NODE_ENV=production nohup node /usr/local/node/${i}/index.js >/var/log/${i}.log 2>&1 &
-  done
+  start
 }
 uninstall() {
+  stop
   for i in ${node_apps[@]}; do
-    pkill ${i}
     rm -rf /usr/local/node/${i}
   done
   rm -rf /var/run/graphql-api.sock
 }
-reload() {
-  kill -SIGHUP $(ps -C node --no-headers -o pid)
-}
 case "$1" in
+'status')
+  status
+  ;;
+'start')
+  start
+  ;;
+'stop')
+  stop
+  ;;
+'reload')
+  reload
+  ;;
 'install')
   install
   ;;
 'uninstall')
   uninstall
   ;;
-'reload')
-  reload
-  ;;
 *)
-  echo "usage $0 install|uninstall|reload"
+  echo "usage $0 status|start|stop|reload|install|uninstall"
 esac
 ]]>
 </INLINE>
