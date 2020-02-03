@@ -4,10 +4,10 @@
 <!ENTITY name      "Unraid.net">
 <!ENTITY launch    "Settings/ManagementAccess">
 <!ENTITY author    "limetech">
-<!ENTITY version   "2020.02.03">
+<!ENTITY version   "2020.02.03a">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/limetech/&name;/next/&name;.plg">
-<!ENTITY graphql-api "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-graphql-api-v2.1.25.tgz">
-<!ENTITY plugins     "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-plugins-v1.1.3.tgz">
+<!ENTITY graphql-api "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-graphql-api-v2.1.26.tgz">
+<!ENTITY plugins     "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-plugins-v1.1.4.tgz">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" launch="&launch;" support="https://forums.unraid.net" min="6.8.0-rc0w">
@@ -46,10 +46,10 @@ fi
 <INLINE>
 <![CDATA[
 #!/bin/sh
-# start/stop unraid-api - development version
+# install/uninstall unraid-api - development version
 downloads=(graphql-api plugins)
 node_apps=(graphql-api)
-start() {
+install() {
   mkdir -p /usr/local/node
   for i in ${downloads[@]}; do
     tar -C /usr/local/node -xf /boot/config/plugins/Unraid.net/unraid-${i}.tgz
@@ -60,22 +60,28 @@ start() {
     NODE_ENV=production nohup node /usr/local/node/${i}/index.js >/var/log/${i}.log 2>&1 &
   done
 }
-stop() {
+uninstall() {
   for i in ${node_apps[@]}; do
     pkill ${i}
     rm -rf /usr/local/node/${i}
   done
   rm -rf /var/run/graphql-api.sock
 }
+reload() {
+  kill -SIGHUP $(ps -C node --no-headers -o pid)
+}
 case "$1" in
-'start')
-  start
+'install')
+  install
   ;;
-'stop')
-  stop
+'uninstall')
+  uninstall
+  ;;
+'reload')
+  reload
   ;;
 *)
-  echo "usage $0 start|stop"
+  echo "usage $0 install|uninstall|reload"
 esac
 ]]>
 </INLINE>
@@ -734,7 +740,7 @@ response_complete($httpcode, '{}');
 <!-- gitty up -->
 <FILE Run="/bin/bash" Method="install">
 <INLINE>
-echo "/etc/rc.d/rc.unraid-api start" | at -M now
+echo "/etc/rc.d/rc.unraid-api install" | at -M now
 </INLINE>
 </FILE>
 
