@@ -4,9 +4,9 @@
 <!ENTITY name      "Unraid.net">
 <!ENTITY launch    "Settings/ManagementAccess">
 <!ENTITY author    "limetech">
-<!ENTITY version   "2020.02.03b">
+<!ENTITY version   "2020.02.07">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/limetech/&name;/next/&name;.plg">
-<!ENTITY graphql-api "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-graphql-api-v2.1.26.tgz">
+<!ENTITY graphql-api "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-graphql-api-v2.1.27.tgz">
 <!ENTITY plugins     "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-plugins-v1.1.4.tgz">
 ]>
 
@@ -45,14 +45,18 @@ fi
 <FILE Name="/etc/rc.d/rc.unraid-api" Mode="0755">
 <INLINE>
 <![CDATA[
-#!/bin/sh
-# unraid-core-handler
+#!/bin/bash
+# unraid-api-handler
 downloads=(graphql-api plugins)
 node_apps=(graphql-api)
+if [[ $* == *--mode\=dev* ]]; then
+  mode="development"
+else
+  mode="production"
+fi
 status() {
-  master_running=$(ps -C node --no-headers -o pid)
-  graphql_api_running=$(ps -C graphql-api --no-headers -o pid)
-
+  local master_running=$(ps -C gql-supervisor --no-headers -o pid)
+  local graphql_api_running=$(ps -C graphql-api --no-headers -o pid)
   if [[ $master_running ]]; then
     echo "The master process is running."
 
@@ -61,12 +65,19 @@ status() {
     fi
   else
     echo "No processes are running."
-  fi  
+  fi
 }
 start() {
-  for i in ${node_apps[@]}; do
-    NODE_ENV=production nohup node /usr/local/node/${i}/index.js >/var/log/${i}.log 2>&1 &
-  done
+  local master_running=$(ps -C gql-supervisor --no-headers -o pid)
+  if [[ $master_running ]]; then
+    echo "The master process is already running, please wait or try the reload command."
+    exit 1
+  else
+    for i in ${node_apps[@]}; do
+      NODE_ENV=$(echo $mode) nohup node /usr/local/node/${i}/index.js >/var/log/${i}.log 2>&1 &
+    done
+    exit 0
+  fi
 }
 stop() {
   for i in ${node_apps[@]}; do
@@ -74,7 +85,10 @@ stop() {
   done
 }
 reload() {
-  kill -SIGHUP $(ps -C node --no-headers -o pid)
+  kill -SIGHUP $(ps -C gql-supervisor --no-headers -o pid)
+}
+logs() {
+  tail -f /var/log/graphql-api.log
 }
 install() {
   mkdir -p /usr/local/node
@@ -105,6 +119,9 @@ case "$1" in
 'reload')
   reload
   ;;
+'logs')
+  logs
+  ;;
 'install')
   install
   ;;
@@ -112,7 +129,7 @@ case "$1" in
   uninstall
   ;;
 *)
-  echo "usage $0 status|start|stop|reload|install|uninstall"
+  echo "usage $0 status|start|stop|reload|logs|install|uninstall"
 esac
 ]]>
 </INLINE>
@@ -771,7 +788,7 @@ response_complete($httpcode, '{}');
 <!-- gitty up -->
 <FILE Run="/bin/bash" Method="install">
 <INLINE>
-echo "/etc/rc.d/rc.unraid-api install" | at -M now
+echo "/etc/rc.d/rc.unraid-api install" | at -M now + 1 min
 </INLINE>
 </FILE>
 
