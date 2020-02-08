@@ -4,7 +4,7 @@
 <!ENTITY name      "Unraid.net">
 <!ENTITY launch    "Settings/ManagementAccess">
 <!ENTITY author    "limetech">
-<!ENTITY version   "2020.02.07">
+<!ENTITY version   "2020.02.08">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/limetech/&name;/next/&name;.plg">
 <!ENTITY graphql-api "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-graphql-api-v2.1.27.tgz">
 <!ENTITY plugins     "https://s3.amazonaws.com/dnld.lime-technology.com/unraid-api/unraid-plugins-v1.1.4.tgz">
@@ -49,28 +49,39 @@ fi
 # unraid-api-handler
 downloads=(graphql-api plugins)
 node_apps=(graphql-api)
+mode="production"
 if [[ $* == *--mode\=dev* ]]; then
   mode="development"
-else
-  mode="production"
 fi
 status() {
-  local master_running=$(ps -C gql-supervisor --no-headers -o pid)
-  local graphql_api_running=$(ps -C graphql-api --no-headers -o pid)
-  if [[ $master_running ]]; then
-    echo "The master process is running."
+  local supervisor_pid=$(ps -C gql-supervisor --no-headers -o pid | xargs)
+  local graphql_api_pid=$(ps -C graphql-api --no-headers -o pid | xargs)
+  if [[ $supervisor_pid ]]; then
+    echo "The supervisor($supervisor_pid) process is running."
 
-    if [[ $graphql_api_running ]]; then
-      echo "graphql-api is running."
+    if [[ $graphql_api_pid ]]; then
+      echo "Graphql-api($graphql_api_pid) is running."
     fi
   else
-    echo "No processes are running."
+    if [ -S "/var/run/graphql-api.sock" ]; then
+      echo "Graphql-api($graphql_api_pid) is running but we can't find the supervisor process."
+    else
+      echo "No processes are running."
+    fi
   fi
 }
+version() {
+  # Borrowed from https://gist.github.com/DarrenN/8c6a5b969481725a4413
+  local graphql_version=$(grep '"version"' /usr/local/node/graphql-api/package.json | cut -d '"' -f 4)
+  local plugins_version=$(grep '"version"' /usr/local/node/plugins/package.json | cut -d '"' -f 4)
+
+  echo "Grahpql-api v$graphql_version"
+  echo "Offical plugins v$plugins_version"
+}
 start() {
-  local master_running=$(ps -C gql-supervisor --no-headers -o pid)
-  if [[ $master_running ]]; then
-    echo "The master process is already running, please wait or try the reload command."
+  local supervisor_pid=$(ps -C gql-supervisor --no-headers -o pid | xargs)
+  if [[ $supervisor_pid ]]; then
+    echo "The supervisor($supervisor_pid) process is already running, please wait or try the \"reload\" command."
     exit 1
   else
     for i in ${node_apps[@]}; do
@@ -88,7 +99,11 @@ reload() {
   kill -SIGHUP $(ps -C gql-supervisor --no-headers -o pid)
 }
 logs() {
-  tail -f /var/log/graphql-api.log
+  if [ -f "/var/log/graphql-api.log" ]; then
+    tail -f /var/log/graphql-api.log
+  else 
+    echo "Process hasn't been started yet, try the \"start\" command."
+  fi
 }
 install() {
   mkdir -p /usr/local/node
@@ -109,6 +124,9 @@ uninstall() {
 case "$1" in
 'status')
   status
+  ;;
+'version')
+  version
   ;;
 'start')
   start
