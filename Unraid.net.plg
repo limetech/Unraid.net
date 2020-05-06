@@ -145,7 +145,7 @@ if (empty($remote['wanport'])) {
 
 $hasCert = file_exists('/boot/config/ssl/certs/certificate_bundle.pem');
 $isRegistered = !empty($remote['apikey']);
-$boolWebUIAuth = $isRegistered || file_exists('/etc/nginx/htpasswd');
+$boolWebUIAuth = ($remote['wanaccess']=='yes' && $remote['wanport']!='0') || file_exists('/etc/nginx/htpasswd');
 
 $isActivated = false;
 $isUptodate = false;
@@ -173,7 +173,7 @@ function registerServer(button) {
             $.post('/webGui/include/Dispatcher.php',{
                 "#cfg": "/boot/config/plugins/dynamix/dynamix.cfg",
                 "remote_apikey": data.apikey,
-                "remote_wanaccess": $('#wanaccess').val(),
+                "remote_wanaccess": $('#wanport').val()==0?'no':$('#wanaccess').val(),
                 "remote_wanport": $('#wanport').val()
             });
             $(button).prop("disabled", false).html(oldlabel);
